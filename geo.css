@@ -63,11 +63,26 @@ input {
     color: #ff5722;
 }
 
-@media (min-width: 768px) {
+
+@media (max-width: 767px) {
+    .container {
+        width: 98%;       /* 画面ほぼいっぱいに */
+        max-width: 100%;  /* 横幅制限解除 */
+        padding: 2vw;     /* 内側の余白も少し広め */
+    }
+
+    #question {
+        font-size: 20px;          /* 文字は少し小さめで一行に入りやすく */
+        padding: 1vw;             /* 内側余白をvw単位で調整 */
+        word-wrap: normal;        /* 折り返しを最小化 */
+        white-space: normal;      /* nowrap にしたい場合は nowrap に */
+    }
+
     h2 { font-size: 40px; }
     button { font-size: 30px; padding: 1vh 1vw; }
+    
     input { font-size: 25px; padding: 1vh; width: 80%; }
-    #question { font-size: 20px; }
+   
     #result, #answer { font-size: 30px; }
-    .container { width: 1200px; padding: 1vh; }
+    
 }

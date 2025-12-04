@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>国当てクイズ</title>
+<link rel="stylesheet" href="geoquestion.css">
+</head>
+<body>
+  <div class="container">
+    <h1>国当てクイズ</h1>
+
+    <button id="changeCountryBtn">国変更</button>
+    <button id="addImageBtn">画像追加</button>
+
+    <div id="imageContainer"></div>
+
+    <input type="text" id="userInput" placeholder="国名を入力">
+    <button id="checkAnswerBtn">答え合わせ</button>
+    <button id="showAnswerBtn">答えを見る</button>
+
+    <p id="result"></p>
+  </div>
+
+  <script>
+    let currentCountry = null;
+let remainingImages = []; // 重複防止用の配列
+
+const changeCountryBtn = document.getElementById("changeCountryBtn");
+const addImageBtn = document.getElementById("addImageBtn");
+const imageContainer = document.getElementById("imageContainer");
+const userInput = document.getElementById("userInput");
+const checkAnswerBtn = document.getElementById("checkAnswerBtn");
+const showAnswerBtn = document.getElementById("showAnswerBtn");
+const result = document.getElementById("result");
+
+// 国ごとの画像データ
+const countries = {
+      "ブラジル":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "コロンビア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "エクアドル":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ペルー":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "チリ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ボリビア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "アルゼンチン":["geo/ar1.png", "geo/ar2.png", "geo/ar3.png", "geo/ar4.png"],
+      "ウルグアイ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "メキシコ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "グアテマラ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "プエルトリコ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "パナマ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ドミニカ共和国":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "アメリカ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "カナダ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "中国":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "韓国":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "台湾":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "フィリピン":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "マレーシア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "インドネシア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "タイ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "カンボジア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ラオス":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ミャンマー":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "シンガポール":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "インド":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "バングラデシュ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ブータン":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "パキスタン":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "キルギス":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "モンゴル":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ロシア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "カザフスタン":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "オーストラリア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ニュージーランド":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "南アフリカ共和国":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "エスワティニ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "レソト":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ボツワナ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "セネガル":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ケニア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ウガンダ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ルワンダ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "モロッコ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ナイジェリア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ガーナ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "オマーン":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "アラブ首長国連邦":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "カタール":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ヨルダン":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "イスラエル":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ノルウェー":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "スウェーデン":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "フィンランド":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ポルトガル":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "スペイン":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "フランス":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ドイツ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "イギリス":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "アイスランド":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "イタリア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "チェコ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "スロバキア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "オーストリア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ベルギー":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "オランダ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ルクセンブルク":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "スイス":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "リヒテンシュタイン":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "スロベニア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "エストニア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "リトアニア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ラトビア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ブルガリア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ウクライナ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],   
+      "北マケドニア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "セルビア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "アルバニア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "モンテネグロ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ギリシャ":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ポーランド":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "デンマーク":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "アイルランド":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "クロアチア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ハンガリー":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ルーマニア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "北マリアナ諸島":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "クリスマス島":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "グアム":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "アメリカ領サモア":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "ミッドウェー島":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+      "":["geo/.png", "geo/.png", "geo/.png", "geo/.png"],
+   /*"":["geo/.png", "geo/.png", "geo/.png", "geo/.png"], */
+};
+
+// 国変更ボタン
+changeCountryBtn.addEventListener("click", () => {
+  const keys = Object.keys(countries);
+  currentCountry = keys[Math.floor(Math.random() * keys.length)];
+  // 重複防止用に配列をコピー
+  remainingImages = [...countries[currentCountry]];
+  imageContainer.innerHTML = "";
+  result.textContent = "";
+  userInput.value = "";
+  console.log("選ばれた国:", currentCountry);
+});
+
+// 画像追加ボタン
+addImageBtn.addEventListener("click", () => {
+  if (!currentCountry) {
+    alert("まず国を選んでください！");
+    return;
+  }
+  if (remainingImages.length === 0) {
+    alert("もう追加できる画像はありません！");
+    return;
+  }
+  // ランダムで1枚選ぶ
+  const idx = Math.floor(Math.random() * remainingImages.length);
+  const imgSrc = remainingImages[idx];
+
+  // 配列から削除して重複防止
+  remainingImages.splice(idx, 1);
+
+  const imgElem = document.createElement("img");
+  imgElem.src = imgSrc;
+  imgElem.alt = currentCountry;
+  imageContainer.appendChild(imgElem);
+});
+
+// 答え合わせ
+checkAnswerBtn.addEventListener("click", () => {
+  if (!currentCountry) return;
+  const answer = userInput.value.trim();
+  if (answer === "") return;
+  if (answer === currentCountry) {
+    result.textContent = "正解！";
+    result.style.color = "green";
+  } else {
+    result.textContent = "不正解";
+    result.style.color = "red";
+  }
+});
+
+// 答え表示
+showAnswerBtn.addEventListener("click", () => {
+  if (!currentCountry) return;
+  result.textContent = `答え: ${currentCountry}`;
+  result.style.color = "blue";
+});
+
+
+    
+  </script>
+</body>
+</html>

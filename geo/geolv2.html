@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>言語判定クイズ</title>
+    <link rel="stylesheet" href="geo.css">
+    
+    
+</head>
+<body>
+
+<div class="container">
+    <h2>言語</h2>
+
+    <div id="question">ここにランダムで文章が出ます</div>
+
+    <button onclick="generate()">変更</button>
+
+    <div>
+        <input type="text" id="userInput" placeholder="ここに言語名を入力 (例: 日本語)">
+    </div>
+
+    <button onclick="checkAnswer()">回答</button>
+    <button onclick="showAnswer()">答え</button>
+
+    <div id="result"></div>
+    <div id="answer"></div>
+</div>
+
+
+
+<script>
+    // 文章とその言語をセットで管理
+    const data = [
+        
+        { text: "تشرق الشمس على المدينة، والطيور تغرد على الأشجار. الأطفال يركضون في الحديقة ويلعبون بالكرة، والناس يشربون القهوة على الشرفات. الرياح تهب بلطف، والأوراق تتساقط على الأرصفة. الصوت الخافت للموسيقى يأتي من نافذة مفتوحة، والوقت يمضي ببطء بينما يلاحظ الجميع جمال اللحظة الصغيرة.", lang: ["アラビア語"] },
+        { text: "القمر يطفو فوق الجبال كقطعة فضية، والنجوم تتراقص في السماء بلا صوت. الأشجار تهمس بأسرار قديمة، والحجارة الصغيرة تطير في الهواء. الرياح تحمل ذكريات المدن البعيدة، والساعات تدق بصمت، بينما تتحول الظلال إلى ألوان غريبة على الجدران.", lang: ["アラビア語"] },
+        { text: "تجلس القهوة على الطاولة بينما الشمس تدفئ الغرفة. الطيور تقفز على الأسوار، ويمر دراج بسرعة بجانب النافذة. الأطفال يضحكون في الحديقة، والكتب القديمة مفتوحة على الكراسي. الرياح تحرك الستائر برفق، وتختلط أفكار الغداء وخطط العطلة بجمال اللحظات الصغيرة من اليوم.", lang: ["アラビア語"] },
+        { text: "تطفو النجوم فوق المدينة وكأنها شموع صغيرة، والرياح تحمل أصوات ضحكات لم نسمعها من قبل. الأشجار تتحرك كأنها ترقص، والأنهار تتلألأ بألوان لم تسبق رؤيتها. الساعات تمشي للخلف، والظلال ترسم وجوهًا غريبة على الجدران، بينما يختلط الواقع بالحلم في كل لحظة.", lang: ["アラビア語"] },
+        
+        { text: "Le soleil se lève sur la ville tranquille, et les oiseaux chantent dans les arbres. Les enfants courent dans le parc en riant, tandis que les chiens jouent avec les balles. L'odeur du café flotte depuis les fenêtres ouvertes, et les gens marchent lentement en portant leurs sacs. Les feuilles tombent des arbres, et le vent agite doucement les rideaux, tandis que la journée avance vers le soir.", lang: ["フランス語"] },
+        { text: "Des lanternes flottent dans le jardin tandis que des papillons géants passent entre les arbres. Une bicyclette oubliée se balance sur le porche, et un chien s’assoit sur le toit pour observer le ciel. Le vent apporte des parfums de pain et de lavande, tandis que les étoiles semblent écrire des messages secrets aux habitants endormis", lang: ["フランス語"] },
+        { text: "Un panier de légumes roule doucement sur le trottoir pendant qu’un vieil oiseau observe depuis le lampadaire. Les enfants rient en poursuivant des bulles de savon, et une vieille horloge sur le mur semble sourire. Les feuilles tourbillonnent dans le vent, et l’odeur du pain chaud se mêle à celle de la pluie qui commence à tomber.", lang: ["フランス語"] },
+        { text: "La rivière brille de couleurs impossibles, et les arbres semblent marcher doucement sur le rivage. Des pierres flottent dans l’air comme des nuages, et la lune chante une mélodie oubliée. Les ombres prennent des formes étranges sur les murs, tandis que le vent raconte des histoires de villes lointaines. Le temps lui-même semble hésiter entre hier et demain.", lang: ["フランス語"] },
+
+        { text: "Un perro duerme en la plaza mientras las farolas emiten un brillo extraño. Pájaros de colores desconocidos vuelan entre los edificios, y una bicicleta oxidada rueda sola por la acera. El aroma del pan recién horneado se mezcla con el viento, mientras sombras inesperadas dibujan formas caprichosas en las paredes.", lang: ["スペイン語"] },
+        { text: "Las estrellas parecen caer en el parque mientras un gato camina sobre los techos. Un globo rojo flota lentamente entre los árboles, y los bancos murmuran secretos antiguos. El viento transporta risas lejanas, y las sombras de las flores dibujan figuras extrañas en el pavimento, mientras la luna observa todo desde lo alto.", lang: ["スペイン語"] },
+        { text: "Los niños corren por la calle mientras los perros persiguen pelotas de colores. Una bicicleta olvidada se tambalea sobre la acera, y las hojas caídas bailan con el viento. La gente pasea con bolsas de mercado, mientras el aroma del pan recién horneado llega desde las panaderías cercanas y los pájaros cantan sin parar sobre los tejados.", lang: ["スペイン語"] },
+        { text: "Un reloj antiguo camina solo por la plaza mientras las farolas parpadean como ojos. Las nubes bajan lentamente entre los edificios, y unas piedras flotan sobre el río sin mojarse. Un gato observa desde el techo, y los árboles susurran nombres que nadie recuerda, mientras la noche se mezcla con la luz de los primeros faroles encendidos.", lang: ["スペイン語"] },
+
+        { text: "Vana latern vilgub tänavanurgal, samal ajal kui tuul veeretab kuivanud lehti mööda kõnniteed. Üksik kass jälgib vaikides puulatvades liikuvaid varje. Jõgi helendab sinakasroheliselt ja eemal kõliseb jalgratas, justkui keegi lükkaks seda nähtamatu käega.", lang: ["エストニア語"] },
+        { text: "Vana torn kõigub tuules, samal ajal kui hõbedased linnud lendavad üle põldude. Järvepind helendab nagu sulaklaas ja kivid libisevad aeglaselt mööda kallast. Öö varjud moodustavad kujundeid, mida keegi ei oska seletada.", lang: ["エストニア語"] },
+        { text: "Turul müüb vanaproua hiiglaslikke tomateid, mida keegi tõsta ei jaksa. Jalgratturid sõidavad mööda, unustades oma ostud leti äärde. Lapsed jooksevad ringi, koerad hauguvad ja tuul keerutab paberkotte õhus.", lang: ["エストニア語"] },
+        { text: "Männimets lõhnab värskelt, ning varahommikune udu ripub madalal puude vahel. Jänes sööstab läbi rohu, samal ajal kui lind alustab oma esimest laulu. Päike tõuseb aeglaselt, värvides kogu metsa kuldseks.", lang: ["エストニア語"] },
+        
+        { text: "Vecs pulkstenis mežā skan kā čuksts, kamēr koki lēni pārvietojas gluži kā dzīvas būtnes. Ezeriņš spīd zilganā gaismā, un akmeņi lēnām ceļas virs ūdens. Nakts ēnas dejo, it kā tām būtu savas slepenas balsis.", lang: ["ラトビア語"] },
+        { text: "Kafejnīcā suns sēž pie galda un skatās uz smalkmaizītēm, cerot uz brīnumu. Divi bērni strīdas par saldo, bet oficiants mierīgi slauka galdu. Pa logu lidinās plastmasas maisiņš, kas uzvedas kā balons.", lang: ["ラトビア語"] },
+        { text: "Rīta migla klāj pļavas, un putni sāk savas pirmās dziesmas. Stirna uzmanīgi soļo gar krūmiem, bet vējš lēni šūpo garo zāli. Saule pamazām paceļas, izgaismojot kluso ainavu ar siltu zeltainu gaismu.", lang: ["ラトビア語"] },
+        { text: "Iela raustās kā elpojoša virsma, un laternas mirgo kā acis. Veca soma pati pārvietojas pa bruģi, atstājot dīvainas pēdas. Debesis pārvēršas sarkanās svītrās, un neviena skaņa vairs neizklausās pazīstama.", lang: ["ラトビア語"] },
+       
+        { text: "Miško pakraštyje gyvenanti biologė pasakojo, kad kiekvieną rytą ji eina stebėti retų paukščių, kurių giesmės primena senas legendas.", lang: ["リトアニア語"] },
+        { text: "Senamiesčio kepykloje dirbantis vyras kiekvieną aušrą ruošia tešlą, sakydamas, kad šviežių bandelių kvapas gali pakeisti net blogiausią nuotaiką.Jo manymu, paprasti dalykai kartais turi didžiausią galią.", lang: ["リトアニア語"] },
+        { text: "Kelionėmis gyvenanti studentė pasakojo, kad per vasarą apkeliavo kelis mažus miestelius, kur žmonės sveikindavosi taip nuoširdžiai, lyg lauktų jos sugrįžtant.", lang: ["リトアニア語"] },
+        { text: "Pievose dirbantis ūkininkas kiekvieną vakarą stebi, kaip vėjas juda per javus, tarsi pieštų nematomas linijas.Jam atrodo,kad žemė kalba su tais, kurie moka būti kantrūs ir tylūs.", lang: ["リトアニア語"] },
+
+        { text: "V horské vesnici žijící tesař tvrdil, že ranní mlha mezi smrky mu připomíná dny, kai kdy stavěl svůj první dům a věřil, že každý kus dřeva má vlastní příběh, pokud se člověk naučí naslouchat", lang: ["チェコ語"] },
+        { text: "Starší knihovnice říkala, že lidé často hledají odpovědi v encyklopediích, ale největší moudrost nachází v krátkých rozhovorech s návštěvníky, protože i tiché úsměvy dokážou vyprávět celé kapitoly.", lang: ["チェコ語"] },
+        { text: "Mladý muzikant popisoval, že na nádraží skládá melodie podle kroků cestujících, jejichž rytmus se mění podle počasí, a věří, že město je vlastně obrovský orchestr.", lang: ["チェコ語"] },
+        { text: "Cestovatel pracující na lodi tvrdil, že moře má tisíce barev, které se nedají zachytit ani fotoaparátem, a že největší ticho člověk zažije uprostřed nekonečné vody.", lang: ["チェコ語"] },
+        
+        { text: "Mladý botanik tvrdil, že keď ráno vstúpi do lesa, každá vôňa mu pripomína inú spomienku, a preto verí, že príroda dokáže človeku ukázať pravdu aj bez slov, ak jej dovolí viesť jeho kroky.", lang: ["スロバキア語"] },
+        { text: "Starý pekár z dediny rozprával, že tajomstvo dobrého chleba nespočíva v recepte, ale v pokojnom rytme rúk, ktoré miesia cesto tak, akoby doň vkladali celé roky skúseností.", lang: ["スロバキア語"] },
+        { text: "Študentka cestujúca vlakom opisovala, ako sleduje krajinu miznúcu za oknom, lebo v premenlivom obraze vidí dôkaz, že aj krátke okamihy môžu niesť veľkú hodnotu.", lang: ["スロバキア語"] },
+        { text: "Remeselník pracujúci s kovom hovoril, že každý úder kladiva je ako dialóg medzi človekom a materiálom, pretože kov sa prispôsobí len tomu, kto pracuje s rozhodnosťou aj rešpektom.", lang: ["スロバキア語"] },
+
+        { text: "Mladi čebelar je pripovedoval, da se ob prvem jutranjem brenčanju zave, kako občutljivo je ravnovesje v naravi, in zato verjame, da čebele učijo človeka potrpežljivosti bolje kot katera koli knjiga.", lang: ["スロベニア語"] },
+        { text: "Starejša učiteljica je trdila, da otroci najjasneje razumejo svet takrat, ko jim pusti razmišljati po svoje, saj domišljija pogosto najde poti, ki jih logika še ne pozna.", lang: ["スロベニア語"] },
+        { text: "Popotnica iz obalnega mesta je opisovala, kako ji valovi govorijo zgodbe preteklih let, in prav zato se vrača na isto obalo, kadar potrebuje občutek stalnosti.", lang: ["スロベニア語"] },
+        { text: "Gorski vodnik je razlagal, da se človek spremeni, ko prvič stoji na robu previsa, saj se tam nauči, kako majhen je in kako veliko spoštovanje si gore zaslužijo.", lang: ["スロベニア語"] },
+
+        { text: "Jutros je obala bila gotovo pusta, a valovi su se lomili tiše nego inače. Čak su i ribari rekli da takvu mirnoću nisu dugo vidjeli. Hodao sam polako i pokušavao zapamtiti svaki detalj prizora.", lang: ["クロアチア語"] },
+        { text: "U staroj gradskoj knjižnici, Ana je pronašla rukopis za koji nitko nije znao da postoji. Stranice su bile požutjele, ali priča je i dalje nosila snažnu poruku o hrabrosti i upornosti.", lang: ["クロアチア語"] },
+        { text: "Na brdu iznad sela često se okupljaju putnici. Kažu da tamošnji vjetar donosi mir i pomaže ljudima da razbistre misli. Jedan je starac tvrdio da je upravo ondje donio najvažniju odluku u životu.", lang: ["クロアチア語"] },
+        { text: "U Đakovu je djevojčica Đurđa pronašla stari dnevnik svoje bake, u kojem su bile zapisane priče o životu na selu i događajima koji su oblikovali njihovu obitelj.", lang: ["クロアチア語"] },
+
+        { text: "Maidin amháin ar an gcósta, chonaic mé solas bog ag briseadh tríd na scamaill. Bhí an fharraige fós, agus bhí boladh na mara ag meascadh leis an ngaoth éadrom. Shíl mé go raibh an domhan ag análú níos moille ná riamh.", lang: ["アイルランド語"] },
+        { text: "Bhailigh Seán na leabhair ar an mbord sa seanchaisleán, áit a raibh scéalta ársa scríofa le lámh fós ag fanacht le léitheoirí. Mhothaigh sé go raibh sé ag siúl trí stair bheo gach uair a d’oscail sé leathanach.", lang: ["アイルランド語"] },
+        { text: "Deir muintir an bhaile go dtagann ceo mistéireach gach oíche Déardaoin. Clúdaíonn sé na sráideanna go mall, amhail is go bhfuil sé ag iarraidh rún éigin a chosaint. Ní théann ach na daoine misniúla amach ag an am sin.", lang: ["アイルランド語"] },
+        { text: "Nuair a tháinig an bus go tobann, bhí Máire réidh le dul ar a turas fada. Bhí sí ag lorg athraithe, agus chreid sí go mbeadh na háiteanna nua a bhfeicfeadh sí mar thús úr dá saol. Níor fhéach sí siar fiú uair amháin.", lang: ["アイルランド語"] },
+
+        { text: "Nesta manhã tranquila, a cidade parecia mover-se com uma lentidão agradável. O som distante dos carros misturava-se com o canto suave dos pássaros. Caminhei pela rua tentando perceber detalhes que nunca tinha notado antes.", lang: ["ポルトガル語"] },
+        { text: "Luís encontrou um antigo diário enquanto limpava o sótão da casa da família. As páginas estavam gastas, mas revelavam histórias de viagens, encontros inesperados e sonhos que seus antepassados nunca chegaram a realizar.", lang: ["ポルトガル語"] },
+        { text: "Quando o trem finalmente partiu, Carla sentiu uma mistura de medo e entusiasmo. Era sua primeira viagem sozinha, e cada paisagem que passava pela janela parecia prometer novos começos e memórias que durariam para sempre.", lang: ["ポルトガル語"] },
+        { text: "Nas últimas eleições, muitos jovens ouviram debates nas praças e decidiram agir, formando grupos para discutir propostas e visitar bairros com o objetivo de entender melhor as condições locais.", lang: ["ポルトガル語"] },
+
+        { text: "Poranne światło wpadło do pokoju przez wąską szczelinę w zasłonach. Marta powoli przygotowywała się do wyjścia, słuchając cichego szumu ulicy. Chciała zacząć dzień spokojnie i znaleźć chwilę na własne myśli.", lang: ["ポーランド語"] },
+        { text: "Na starym rynku zgromadziło się wielu ludzi, bo lokalny rzemieślnik prezentował nową kolekcję ręcznie tworzonych naczyń. Każdy przedmiot miał własną historię i wyjątkowe wzory, które od razu przyciągały wzrok turystów.", lang: ["ポーランド語"] },
+        { text: "W górskiej wiosce często opowiada się legendy o tajemniczym wędrowcu, który podobno pojawia się tylko podczas pelni księżyca. Mieszkańcy twierdzą, że przynosi on dobre wieści i pomaga tym, którzy zagubili drogę.", lang: ["ポーランド語"] },
+        { text: "Kiedy pociąg ruszyl z peronu, Tomasz poczul dreszcz ekscytacji. Wiedzial, że czeka go dluga podróż, pełna nowych doświadczeń i nieoczekiwanych spotkań. Patrzyl przez okno, obserwując zmieniające się krajobrazy.", lang: ["ポーランド語"] },
+
+        { text: "Am frühen Morgen lag ein leichter Nebel über den Feldern, und die Straße war fast völlig leer. Während ich langsam weiterging, hörte ich nur das ferne Zwitschern der Vögel und spürte die frische, kühle Luft.", lang: ["ドイツ語"] },
+        { text: "Im alten Stadtmuseum entdeckte Clara ein vergilbtes Notizbuch, das einst einem unbekannten Reisenden gehörte. Die detaillierten Beschreibungen ferner Orte faszinierten sie so sehr, dass sie die Zeit völlig vergaß.", lang: ["ドイツ語"] },
+        { text: "Viele Bewohner des kleinen Dorfes versammeln sich jeden Freitag auf dem Marktplatz. Dort tauschen sie Geschichten, verkaufen handgemachte Produkte und genieben die Atmosphäre, die an vergangene Zeiten erinnert.", lang: ["ドイツ語"] },
+        { text: "Als der Bus endlich ankam, stieg Leon mit einem Gefühl der Vorfreude ein. Er wollte neue Städte sehen, andere Menschen treffen und herausfinden, ob die Welt wirklich so grob ist, wie er es sich immer vorgestellt hatte.", lang: ["ドイツ語"] },
+
+        { text: "Quella mattina il cielo era coperto da nuvole leggere, e la città sembrava muoversi più lentamente del solito. Camminavo lungo il fiume osservando l’acqua calma, cercando un momento di pace prima dell’inizio della giornata.", lang: ["イタリア語"] },
+        { text: "Nel vecchio teatro del paese, Elena trovò un manifesto dimenticato dietro una tenda. Mostrava lo spettacolo che sua nonna aveva diretto molti anni prima. Sentì un’emozione profonda e decise di restaurarlo con cura.", lang: ["イタリア語"] },
+        { text: "Ogni domenica, nel mercato centrale, venditori di ogni regione portano formaggi, spezie e dolci tradizionali. Il profumo intenso e le voci vivaci creano un’atmosfera unica che attira sempre più visitatori curiosi.", lang: ["イタリア語"] },
+        { text: "Quando il treno lasciò lentamente la stazione, Marco guardò fuori dal finestrino, desideroso di scoprire nuovi paesaggi. Il viaggio rappresentava per lui un cambiamento necessario, un passo verso un futuro che non conosceva.", lang: ["イタリア語"] },
+
+        { text: "Tidigt på morgonen låg dimman som ett tunt täcke över sjön, och vassen rörde sig knappt i den stilla vinden. Jag gick längs stigen och försökte minnas hur platsen hade sett ut för många år sedan när jag först kom hit som barn.", lang: ["スウェーデン語"] },
+        { text: "I den gamla bokhandeln hittade Sara ett brev instucket mellan två dammiga romaner. Handstilen var elegant och texten berättade om en resa genom Europa. Hon undrade vem som hade skrivit det och varför det lämnats kvar där.", lang: ["スウェーデン語"] },
+        { text: "Varje fredag samlas invånarna i byns lilla hall för att dela historier, spela musik och prova hembakade kakor. Den varma stämningen gör att även främlingar känner sig välkomna och gärna atervänder veckan därpa.", lang: ["スウェーデン語"] },
+        { text: "När bussen äntligen kom, steg Johan pa med en känsla av förväntan. Han hade bestämt sig för att lämna allt bakom sig och börja om i en annan stad. Genom fönstret sag han landskapet langsamt förändras medan solen gick ner.", lang: ["スウェーデン語"] },
+
+        { text: "Tidlig om morgenen lå tåken som et stille slør over fjorden, og lyden av måker blandet seg med svak bølgeskvulp. Jeg gikk langs brygga og tenkte på hvor mye stedet hadde forandret seg siden sist jeg var her.", lang: ["ノルウェー語"] },
+        { text: "I den gamle bibliotekbygningen fant Ingrid en mappe full av fotografier fra 1950-tallet. Bildene viste mennesker hun aldri hadde sett før, men som likevel virket merkelige familiære. Hun bestemte seg for å undersøke historien nærmere.", lang: ["ノルウェー語"] },
+        { text: "Hver lørdag møtes folk fra hele bygda på torget for å kjøpe ferske grønnsaker, håndverk og lokalt bakverk. Lukten av nybakt brød fyller luften, og stemningen er så livlig at selv forbipasserende stopper for å ta en titt.", lang: ["ノルウェー語"] },
+        { text: "Da toget satte seg i bevegelse, lente Emil hodet mot vinduet og så landskapet gli sakte forbi. Han hadde lenge drømt om  reise nordover, og nå føltes det som starten på noe helt nytt, noe han ikke helt kunne beskrive.", lang: ["ノルウェー語"] },
+
+        { text: "Varhain aamulla järven pinta oli täysin tyyni, ja ohut sumu nousi hitaasti veden yltä. Kuljin polkua pitkin ja kuuntelin metsän hiljaisia ääniä, jotka tuntuivat seuraavan jokaista askelta. Päivä alkoi rauhallisesti ja lupaavasti.", lang: ["フィンランド語"] },
+        { text: "Vanhan koulun ullakolta löytyi laatikko täynnä kirjeitä, jotka oli kirjoitettu melkein sata vuotta sitten. Kirjeissä kerrottiin matkustamisesta, arjen iloista ja haasteista. Laura jäi lukemaan niitä tuntikausiksi, unohtaen ajan kulun.", lang: ["フィンランド語"] },
+        { text: "Kylän torilla myyjät asettelivat tuoreita marjoja ja leivonnaisia pöydilleen. Ihmiset pysähtyivät juttelemaan, vaihtamaan kuulumisia ja maistelemaan uusia tuotteita. Tunnelma oli lämmin ja kodikas, aivan kuten joka lauantai.", lang: ["フィンランド語"] },
+        { text: "Kun juna lähti liikkeelle, Aapo painoi otsansa ikkunaa vasten ja seurasi nopeasti vaihtuvia maisemia. Hän oli odottanut tätä matkaa pitkään ja toivoi löytävänsä inspiraatiota uusiin suunnitelmiinsa ja unelmiinsa.", lang: ["フィンランド語"] },
+
+        { text: "Snemma morguns lá þoka yfir dalnum og fuglarnir sungu lágt eins og þeir vildu ekki vekja neinn. Ég gekk rólega eftir stígnum og fann kalda vindinn strjúka andlitið á mér meðan sólin reyndi að brjótast í gegnum skýin.", lang: ["アイスランド語"] },
+        { text: "Í gömlu bókasafni bæjarins rak Anna sig á handskrifaða dagbók sem hafði verið falin á milli tveggja ryðugra hillna. Hún opnaði hana varlega og fann sögur um ævintýri, fólk og staði sem hún hafði aldrei heyrt um áður.", lang: ["アイスランド語"] },
+        { text: "Á laugardagsmorgnum safnast fólk á torginu til að kaupa ferskar vörur frá bændum úr nágrenninu. Ilmur af brauði, hunangi og reyktum fiski fyllir loftið og skapar hlýlega stemningu sem dregur að bæði heimamenn og gesti.", lang: ["アイスランド語"] },
+        { text: "Þegar strætóinn byrjaði loks að hreyfast horfði Jón út um gluggann og sá landslagið smám saman breytast. Það var löngu tímabært að leggja af stað í nýja ferð og hann fann fyrir blöndu af spennu og ró í brjósti sínu.", lang: ["アイスランド語"] },
+
+        { text: "Da bussen endelig kørte ud fra stationen, lænede Jonas sig tilbage i sædet og trak vejret dybt. Rejsen betød en ny begyndelse for ham, og han kunne næsten mærke forventningen vokse, mens landskabet ændrede sig udenfor vinduet.", lang: ["デンマーク語"] },
+        { text: "Hver søndag samles folk på byens torv for at købe friske grøntsager, smage lokale specialiteter og høre musikere spille live. Stemningen er varm og livlig, og mange bliver stående længere end planlagt.", lang: ["デンマーク語"] },
+        { text: "I den gamle havnebygning fandt Maria en støvet kasse fyldt med breve fra en sømand, der havde rejst verden rundt. Hvert brev beskrev nye steder og mennesker, og hun blev hurtigt opslugt af historien.", lang: ["デンマーク語"] },
+        { text: "Tidligt om morgenen lå en let dis over markerne, og vinden bevægede sig næsten ikke. Jeg gik en langsom tur langs grusvejen og forsøgte at lægge mærke til de små detaljer, som jeg normalt overser i hverdagen.", lang: ["デンマーク語"] },
+
+        { text: "Kora reggel finom köd ült a folyó fölött, és csak néhány madárhang törte meg a csendet. Lassan sétáltam végig az ösvényen, miközben figyeltem, hogyan csillan meg a napfény a víz felszínén. A nap nyugodtan indult.", lang: ["ハンガリー語"] },
+        { text: "A régi padláson Anna egy dobozra bukkant, tele régi naplókkal és levelekkel. A megsárgult lapokon távoli utazások, elfeledett álmok és különös találkozások történetei sorakoztak. Órákig olvasta őket, teljesen belemerülve.", lang: ["ハンガリー語"] },
+        { text: "A városi piacon árusok kínáltak friss gyümölcsöket, mézet és házi készítésű sajtokat. Az emberek megálltak beszélgetni, megkóstolták a termékeket, és élvezték a vidám hangulatot. Mindenki talált valami érdekeset.", lang: ["ハンガリー語"] },
+        { text: "Amikor a vonat elindult, Bence az ablakhoz hajolt és figyelte, ahogy a táj lassan megváltozik. Régóta vágyott erre az útra, és remélte, hogy új élményekkel és inspirációkkal tér majd vissza. A jövő hirtelen közelinek tűnt.", lang: ["ハンガリー語"] },
+
+        { text: "În dimineața liniștită, orașul părea să se trezească încet, iar lumina soarelui se reflecta în ferestrele clădirilor vechi. Am mers pe stradă ascultând pașii trecătorilor și gândindu-mă la planurile pentru ziua ce începea.", lang: ["ルーマニア語"] },
+        { text: "Pe podul de lângă râu, Andrei a găsit un jurnal vechi, uitat pe o bancă. Filele erau îngălbenite, dar povesteau despre călătorii, oameni misterioși și vise abandonate. Curiozitatea l-a făcut să citească totul până la capăt.", lang: ["ルーマニア語"] },
+        { text: "La piața centrala, vanzatorii își aranjau legumele, fructele și mirodeniile aduse din satele din apropiere. Clienții gustau, întrebau și discutau aprins, iar atmosfera plina de culoare atrgaea mereu vizitatori noi.", lang: ["ルーマニア語"] },
+        { text: "Când autobuzul a pornit din autogară, Ioana s-a așezat lângă geam și a privit peisajele schimbându-se treptat. Pleca într-un loc necunoscut, cu speranța că va găsi un început nou și oameni care să-i inspire drumul mai departe.", lang: ["ルーマニア語"] },
+
+        { text: "Ранним утром над рекой висел лёгкий туман, и только редкие крики птиц нарушали тишину. Я медленно шёл по тропинке и думал о том, как сильно изменилось это место за последние годы.", lang: ["ロシア語"] },
+        { text: "В старом чердаке Мария нашла коробку с письмами, написанными почти век назад. На пожелтевших страницах были описаны путешествия, встречи и мечты, о которых она раньше не слышала. Это её глубоко тронуло.", lang: ["ロシア語"] },
+        { text: "На городском рынке продавцы раскладывали свежие овощи, ягоды и ароматные специи. Люди останавливались, спрашивали цены, пробовали новые продукты. Атмосфера была живой и тёплой, как в лучшие летние дни.", lang: ["ロシア語"] },
+        { text: "Когда поезд тронулся, Артём прислонился лбом к холодному стеклу и наблюдал, как пролетают деревья и поля. Он давно мечтал об этой поездке и надеялся, что она поможет ему найти новые идеи и силы для будущих планов.", lang: ["ロシア語"] },
+
+        { text: "Ранкового туману майже не було видно, і річка спокійно текла між зеленими берегами. Я йшов вузькою стежкою й прислухався до шелесту листя, яке ворушив легкий вітер. День обіцяв бути світлим і затишним.", lang: ["ウクライナ語"] },
+        { text: "На горищі старого будинку Олена знайшла коробку зі зошитами, написаними її прабабусею. На сторінках були історії про подорожі, дружбу та невеликі радощі щоденного життя. Вона читала їх із великим захопленням.", lang: ["ウクライナ語"] },
+        { text: "На міському ринку продавці розкладали свіжі овочі, мед та запашні трави. Люди підходили, куштували сир, розмовляли між собою й ділилися новинами. Атмосфера була тепла й жвава, наповнена кольорами та голосами.", lang: ["ウクライナ語"] },
+        { text: "Коли автобус рушив зі станції, Марко притулився до вікна й дивився на поля, що повільно зникали вдалині. Він сподівався, що ця поїздка допоможе знайти нові ідеї й відкрити для себе щось важливе в майбутньому.", lang: ["ウクライナ語"] },
+
+        { text: "Рано јутро донело је тиху маглу која се спуштала преко поља, док су се у даљини чуле птице. Ходао сам споро путем и размишљао о дану који је тек почињао, тражећи тренутак мира", lang: ["セルビア語"] },
+        { text: "На тавану старе куће Милена је пронашла кутију пуну пожутелих писама. У њима су били описи путовања, сусрета и давно заборављених снова. Читала их је са осмехом, осећајући блискост са прошлошћу.", lang: ["セルビア語"] },
+        { text: "На градској пијаци продавци су излагали свеже воће, поврће и домаће сиреве. Посетиоци су пробали разне укусе, распитивали се и разговарали једни с другима. Живахна атмосфера испунила је читав простор.", lang: ["セルビア語"] },
+        { text: "Када је воз кренуо, Никола је погледао кроз прозор и пратио како се пејзаж постепено мења. Дуго је чекао овај пут и надао се да hе му донети нову инспирацију и храброст за одлуке које га очекују.", lang: ["セルビア語"] },
+
+        { text: "Рано наутро врз долината лежеше тивка магла, а реката мирно течеше меѓу зелените брегови. Одев по тесната патека и го слушав шумолењето на лисјата. Денот изгледаше како да носи нова, нежна енергија.", lang: ["マケドニア語"] },
+        { text: "Во старото поткровје Марија пронајде кутии полни заборавени писма и фотографии. На нив беа запишани приказни за патувања, изгубени пријателства и мали радости од минатото. Долго ги читаше, восхитена од деталите.", lang: ["マケドニア語"] },
+        { text: "На градскиот пазар продавачите внимателно ги редеа свежите производи: мед, зеленчук, билки и миризливи печива. Луѓето застануваа, разговараа и дегустираа. Атмосферата беше жива и топла, како вистински празник.", lang: ["マケドニア語"] },
+        { text: "Кога автобусот тргна од станицата, Петар се навали на прозорот и гледаше како селата полека исчезнуваат во далечината. Патувањето му значеше нов почеток, нешто што одамна го посакуваше и конечно го дочека.", lang: ["マケドニア語"] },
+
+        { text: "Rano ujutro magla je polako prekrivala dolinu, dok su ptice tiho cvrkutale. Hodao sam stazom i posmatrao kako sunčeva svetlost blago obasjava polja, stvarajući osećaj mira i tišine.", lang: ["モンテネグロ語"] },
+        { text: "Na tavanu stare kuće Milica je pronašla kutiju puna starih pisama i fotografija. Svako pismo je pričalo priču o putovanjima, prijateljstvima i snovima koji su davno zaboravljeni. Provela je sate čitajući ih.", lang: ["モンテネグロ語"] },
+        { text: "Na pijaci u centru grada prodavci su izlagali sveže voće, povrće i domaće proizvode. Ljudi su stajali, degustirali i razgovarali. Živa atmosfera činila je da se svi osećaju dobrodošlo i rado vraćali.", lang: ["モンテネグロ語"] },
+        { text: "Kada je autobus krenuo, Luka se naslonio na prozor i posmatrao kako pejzaž polako prolazi. Putovanje je predstavljalo novu avanturu i priliku za otkrivanje novih mesta, ideja i iskustava.", lang: ["モンテネグロ語"] },
+
+        { text: "Рано сутринта над реката се спускаше тънка мъгла, а птиците тихо пееха в далечината. Разхождах се по пътеката и наблюдавах как слънчевата светлина нежно огрява полетата, създавайки усещане за спокойствие.", lang: ["ブルガリア語"] },
+        { text: "В стария таван на къщата Мария откри кутия със забравени писма и снимки. Всяко писмо разказваше истории за пътувания, приятелства и мечти, които времето почти бе изтрило. Тя прекарва часове в четене на тези спомени.", lang: ["ブルガリア語"] },
+        { text: "На градския пазар продавачите подреждаха пресни плодове, зеленчуци и домашни продукти. Хората спираха, опитваха и разговаряха помежду си. Атмосферата беше жива и приветлива, привличаща както местни, така и посетители.", lang: ["ブルガリア語"] },
+        { text: "Когато автобусът потегли, Иван се облегна на прозореца и наблюдаваше как пейзажът бавно се променя. Това пътуване беше началото на ново приключение и възможност да открие нови идеи и преживявания.", lang: ["ブルガリア語"] },
+
+        { text: "Таңғы шық кезінде далаға жеңіл тұман төгіліп, құстар үнсіз ұшып жүрді. Мен жолмен баяу жүріп, желмен тербеліп тұрған шөптің дыбысын тыңдадым. Күннің алғашқы сәулелері барлығын жұмсақ жарыққа бөлеп жатты.", lang: ["カザフ語"] },
+        { text: "Ескі кітапхананың шатырына Айгерім ескі қорап тауып алды. Оның ішінде ұзақ жылдар бойы сақталған хаттар мен күнделіктер болды. Әрбір жазба алыс сапарлар мен кездейсоқ кездесулер туралы баяндап тұрды.", lang: ["カザフ語"] },
+        { text: "Ауылдың орталық базарында сатушылар жаңа піскен көкөністер мен жемістерді, бал мен ұлттық тәттілерді қойды. Халық таянып, сұрады, дәм татып, әңгімелесіп жатты. Атмосфера жылы әрі көңілді болды.", lang: ["カザフ語"] },
+        { text: "Поезд жүріп кеткен кезде Данияр терезеге қарап, айналадағы кең дала мен тауларды бақылап отырды. Ол бұл сапардан жаңа тәжірибе мен шабыт алуға үміттенді, ал алда жаңа қызықты оқиғалар күтіп тұр еді.", lang: ["カザフ語"] },
+
+        { text: "Өглөөний нар мандсаны дараа тал нутгийг нимгэн манан бүрхэж, шувууд чимээгүй нисэж байлаа. Би зам дагуу алхан, салхинд сэвэлзэж буй өвсний шуугианыг сонсов. Өдөр амар амгалан эхэлж байв.", lang: ["モンゴル語"] },
+        { text: "Хуучин гэрийн дээвэрт Анар нэг хайрцаг олсон нь олон жилийн турш хадгалагдсан захидал, тэмдэглэлээр дүүрэн байлаа. Захидлууд нь аялал, учрал, мартагдсан мөрөөдлийн тухай өгүүлж байв. Тэр цагийг мартан уншиж байлаа.", lang: ["モンゴル語"] },
+        { text: "Сумын зах дээр худалдаачид шинэхэн ногоо, жимс, оёдол, амттангаа дэлгэлээ. Хүмүүс зогсож, амталж, яриа өрнүүлж байв. Орчин нь дулаан, амьдралд дүүрэн, хүн бүрийг татаж байлаа.", lang: ["モンゴル語"] },
+        { text: "Галт тэрэг хөдөлөхөд Бат терезэн дээр тулж, өнгөрч буй хээр тал, уулсын үзэсгэлэнт байдлыг ажиглав. Энэхүү аялал нь түүнийг шинэ туршлага, шинэ санаа, шинэ боломжтой танилцах боломж олгож байв.", lang: ["モンゴル語"] },
+
+        { text: "Таң эрте талаа жумшак туман каптап, куштар тынч учуп жүрдү. Мен жолу менен басып, шамал менен сүрүлүп жаткан чөптөрдүн үндөрүн угуп жаттым. Күн жайлуу жана тынч башталды.", lang: ["キルギス語"] },
+        { text: "Эски үйдүн шатырына Айгерим бир куту таап, ал узак убакыт сакталган каттар менен күндөлүктөргө толгон экен. Ар бир катта саякаттар, жолугушуулар жана эски кыялдар жөнүндө баяндалган.", lang: ["キルギス語"] },
+        { text: "Айылдын борбордук базарында сатуучулар жаңы мөмө-жемиш, жашылча жана улуттук таттууларын жайгаштырышты. Эл токтоп, даам татып, бири-бири менен сүйлөшүп жатты. Аба-ырайы жылуу жана жандуу болду.", lang: ["キルギス語"] },
+        { text: "Поезд жүрүп кеткенде Бакай терезеге таянган жана талаа менен тоолордун жайгашуусун карап турган. Бул сапар ага жаңы тажрыйба жана идея алып келмек, ал алдыда жаңы окуяларды күтүп жаткандай сезилди.", lang: ["キルギス語"] },
+
+        { text: "Asubuhi mapema, ukame wa baridi ulitanda kwenye mbuga, na ndege waliimba kwa sauti ndogo. Nilitembea polepole kando ya njia, nikifuatilia jinsi mwangaza wa jua unavyokifunika majani kwa upole.", lang: ["スワヒリ語"] },
+        { text: "Katika ghorofa ya juu ya nyumba ya zamani, Amina alipata sanduku lililojaa barua na kumbukumbu za muda mrefu. Kila barua ilieleza hadithi za safari, marafiki waliopotea, na ndoto zilizosahaulika kwa muda.", lang: ["スワヒリ語"] },
+        { text: "Sokoni, wauzaji walipanga matunda mapya, mboga na vitafunio vya kienyeji. Watu walisimama, kuonja na kuzungumza. Hali ilikuwa ya furaha na joto, ikivutia watalii na wenyeji sawia.", lang: ["スワヒリ語"] },
+        { text: "Gari la moshi lilipoanza kuondoka, Jabari aliketi karibu na dirisha na kutazama mandhari ya mashamba na milima ikibadilika polepole. Alitarajia safari hii kumpa uzoefu mpya na mawazo mapya kwa siku zijazo.", lang: ["スワヒリ語"] },
+
+        { text: "Goizeko lehen argitan, ibaia isilik zetorren eta hegaztiak distantzian txistuka zebiltzan. Nik bide ertzetik pausoak ematen nituen, eguzkiaren izpiak belarretan nola dantzatzen ziren behatuz. Eguna lasai eta atsegin hasi zen.", lang: ["バスク語"] },
+        { text: "Ainhoak aurkitu zuen dorre zaharreko kutxa bat, urte askoan gordeta egon dena. Barnean idatzitako gutunak bidaiez, topaketez eta ahaztutako ametsez beteta zeuden. Ordutegi luzeak eman zizkion gutunak irakurtzeko.", lang: ["バスク語"] },
+        { text: "Herriko azokan saltzaileek barazki freskoak, fruta eta gozoki tradizionalak eskaintzen zituzten. Jendeak gelditzen zen, dastatzen zuen eta elkarrizketak egiten zituen. Giroa beroa eta bizi-bizi zen, bisitari guztiak erakartzen zituena.", lang: ["バスク語"] },
+        { text: "Autobusa irten zenean, Iker leihoaren ondoan jarri eta inguruak behatzen hasi zen. Baserriak eta mendien paisaia poliki-poliki pasatzen ari ziren, eta bidaia honek esperientzia berriak eta inspirazio berria ekarriko ziola uste zuen.", lang: ["バスク語"] },
+
+        { text: "बिहानैको समयमा खोलामाथि हल्का कुहिरो ओर्लिएको थियो, र चरा हरु टाढाबाट चिरबिर गर्दै थिए। म बाटोमा हिँड्दै घाँसको हल्का आवाज सुन्दै थियो। दिन शान्त र रमाइलो देखिन्थ्यो।", lang: ["ネパール語"] },
+        { text: "पुरानो घरको छतमा सीता एक बक्स भेटिन्, जुन धेरै वर्षदेखि राखिएको थियो। त्यसमा पत्र र डायरीहरू थिए। प्रत्येक पत्रले यात्रा, भेटघाट र भुलेका सपनाहरूको कथा सुनाइरहेको थियो।", lang: ["ネパール語"] },
+        { text: "सहरको बजारमा विक्रेताहरूले ताजा फलफूल, तरकारी र स्थानीय परिकारहरू राखेका थिए। मानिसहरू रोकेर स्वाद लिँदै र कुरा गर्दै थिए। वातावरण रमाइलो र उत्साही थियो।", lang: ["ネパール語"] },
+        { text: "रेल गाडी चल्न थाल्दा अर्जुन झ्यालमा टेकेर वरिपरि फैलिएको खेत र पहाड हेर्थ्यो। उसले यो यात्राबाट नयाँ अनुभव र प्रेरणा पाउने आशा राखेको थियो, र नयाँ अवसरहरू उसको अगाडि थिए।", lang: ["ネパール語"] },
+
+        { text: "প্রভাতের আলোয় নদীর উপরে হালকা কুয়াশা নেমে এসেছিল, আর দূরে পাখিরা নিঃশব্দে ডাকছিল। আমি ধীরে ধীরে পথ ধরে হাঁটছিলাম, পাতা ঝড়ের শব্দ শুনছিলাম। দিনটি শান্ত ও মনোরম মনে হচ্ছিল।", lang: ["ベンガル語"] },
+        { text: "পুরনো বাড়ির ছাদে আয়েশা একটি বাক্স পেয়েছিল, যা বহু বছর ধরে রাখা হয়েছিল। তাতে চিঠি এবং ডায়েরি ছিল। প্রতিটি চিঠি যাত্রা, সাক্ষাৎ এবং দীর্ঘদিনের স্বপ্নের গল্প বলছিল।", lang: ["ベンガル語"] },
+        { text: "শহরের বাজারে বিক্রেতারা তাজা ফল, সবজি এবং স্থানীয় খাবার সাজিয়ে রেখেছিল। মানুষ থেমে চেখে দেখছিল এবং কথা বলছিল। পরিবেশ উষ্ণ ও প্রাণবন্ত ছিল, সবাইকে আকৃষ্ট করছিল।", lang: ["ベンガル語"] },
+        { text: "ট্রেন চলতে শুরু করলে রাকিব জানালার পাশে বসে চারপাশের মাঠ ও পাহাড়ের দৃশ্য দেখছিল। সে আশা করছিল এই সফর তাকে নতুন অভিজ্ঞতা এবং অনুপ্রেরণা দেবে, এবং সামনে নতুন সুযোগ অপেক্ষা করছিল।", lang: ["ベンガル語"] },
+
+        { text: "උදේ වකවානු තුළ අඟල් ටිකක් වැසි වැටුණු මෙන් නදිය මතුපිට මැද බිඳී, කුරුල්ලන් දුරින් නිහතමානීව ගායනා කළහ. මම මාර්ගය අසළ හැසිරවෙමින් තේජසත් සුළඟේ ඇලවෙන පැලවල් ඇසුවෙමි.", lang: ["シンハラ語"] },
+        { text: "පැරණි ගෙවතු ශීර්ෂතලයේ රමීකා පැරණි ලිපි සහ දිනපොත් ගොනුවක් හමුවුණි. එම ලිපිවල සටහන්ව ඇත්තේ ගමන්, හමුවීම් සහ අමතකවූ සිහින පිළිබඳ කතා වෙයි. ඇය ඒවා කියවා පැය ගණනාවක් ගත කළා.", lang: ["シンハラ語"] },
+        { text: "ගම්මානයේ මධ්‍යපිටියේ වෙළඳයෝ අලුත් එළවළු, පළතුරු සහ දේශීය ආහාර පිළිගත්හ. ජනතාව නව පසුබැසීම් රස බලමින්, කතාබහ පැවැත්වුවහ. පරිසරය උණුසුම් සහ සතුටින් පිරුණු වෙළඳපොලක් විය.", lang: ["シンハラ語"] },
+        { text: "රියදුරේ රථය පිටවෙද්දී සමන් ජනේලයේ ඇලවී පිටපස පැලවුණු පරිසරය අනුගමනය කළා. ඔහු මෙම ගමනෙන් නව අත්දැකීම් සහ ප්‍රेरණා ලබා ගනු ඇතැයි බලා සිටියි, සහ අනාගතයේ නව අවස්ථා ඔහුට බලාපොරොත්තු විය.", lang: ["シンハラ語"] },
+
+        { text: "સવારના શાંત સમયે દરિયા કિનારે ચાલતા વૃદ્ધ માછીમારે કહ્યું કેની સુગંધ તેને બાળપણની યાદો તરફ લઈને જાય છે, જ્યારે તે પહેલી વાર નાવમાં બેઠો હતો અને પાણી પર પડતી પ્રકાશની લહેરોને જોઈને વિશ્વને અલગ નજરે સમજવાનું શરૂ કર્યું હતું. તેણે માને છે કે સમુદ્ર દરેક પ્રશ્નનો જવાબ ધીરજપૂર્વક સંભાળીને રાખે છે", lang: ["グジャラート語"] },
+        { text: "શહેરની ભીડભાડથી દૂર નાના ગામમાં રહેતી એક કારખાનેદાર સ્ત્રીએ સમજાવ્યું કે માટીને આકાર આપતી વખતે તેનો શ્વાસ અને હાથનો તાલબદ્ધ હલનચલન એક પ્રકારની પ્રાર્થના બની જાય છે. તે કહે છે કે કાચી માટી લોકોની ભાવનાઓને યાદ રાખી લે છે અને દરેક હસ્તકલામાં તેના અંતરના શાંત પળો છુપાયેલા રહે છે.", lang: ["グジャラート語"] },
+        { text: "ਸਵੇਰ ਦੀ ਹੌਲੀ ਰੌਸ਼ਨੀ ਵਿੱਚ ਖੇਤਾਂ ਵਿਚੋਂ ਲੰਘਦਾ ਕਿਸਾਨ ਕਹਿੰਦਾ ਸੀ ਕਿ ਹਵਾ ਵਿੱਚ ਮਿੱਟੀ ਦੀ ਖੁਸ਼ਬੂ ਉਸਦੇ ਮਨ ਨੂੰ ਸ਼ਾਂਤ ਕਰ ਦਿੰਦੀ ਹੈ। ਉਹ ਮੰਨਦਾ ਹੈ ਕਿ ਹਰ ਬੀਜ ਆਪਣੇ ਵਿੱਚ ਇੱਕ ਕਹਾਣੀ ਰੱਖਦਾ ਹੈ, ਜੋ ਕੇਵਲ ਉਸ ਸਮੇਂ ਖੁਲ੍ਹਦੀ ਹੈ ਜਦੋਂ ਇਨਸਾਨ ਉਸਨੂੰ ਧੀਰਜ ਨਾਲ ਸਾਂਭਦਾ ਹੈ।", lang: ["パンジャブ語"] },
+        { text: "ਸ਼ਹਿਰ ਦੇ ਪੁਰਾਣੇ ਬਜ਼ਾਰ ਵਿੱਚ ਬੈਠੇ ਕੱਲਾਕਾਰ ਨੇ ਦੱਸਿਆ ਕਿ ਰੰਗ ਉਸਦੇ ਲਈ ਸਿਰਫ਼ ਔਜ਼ਾਰ ਨਹੀਂ, ਬਲਕਿ ਲੋਕਾਂ ਦੀਆਂ ਭਾਵਨਾਵਾਂ ਦੇ ਦਰਪਣ ਹਨ। ਉਹ ਕਹਿੰਦਾ ਹੈ ਕਿ ਕੈਨਵਸ ਤੇ ਪਹਿਲੀ ਲਕੀਰ ਖਿੱਚਣ ਤੋਂ ਪਹਿਲਾਂ ਉਹ ਭੀੜ ਦੇ ਸ਼ੋਰ ਵਿੱਚੋਂ ਉਹ ਖਾਮੋਸ਼ੀ ਲੱਭਦਾ ਹੈ, ਜਿਸ ਨਾਲ ਉਸਦੀ ਕਲਾ ਜੰਮਦੀ ਹੈ।", lang: ["パンジャブ語"] },
+        { text: "ಬೆಳಗಿನ ಮಂಜು ಹರಡಿದ ಕಾಡಿನ ದಾರಿಯಲ್ಲಿ ನಡೆಯುತ್ತಿದ್ದ ಸಂಶೋಧಕನು ಹೇಳುತ್ತಿದ್ದ, ಮರಗಳ ನಡುವೆ ಸುರುಳಿ ಹೊಡೆಯುವ ಬೆಳಕು ಅವನಿಗೆ ಜೀವನದ ಸಣ್ಣ ಸತ್ಯಗಳನ್ನು ನೆನಪಿಸುತ್ತದೆ ಎಂದು. ಪ್ರಕೃತಿಯ ನಿಶ್ಶಬ್ಧತೆಯಲ್ಲಿ ಮನುಷ್ಯನು ತನ್ನೊಳಗಿನ ಗೊಂದಲಗಳ ಉತ್ತರಗಳನ್ನು ಹುಡುಕಬಹುದೆಂಬ ನಂಬಿಕೆ ಅವನದು.", lang: ["カンナダ語"] },
+        { text: "ಹಳೆಯ ಪಟ್ಟಣದ ಮಣ್ಣಿನ ಮನೆಯಲ್ಲಿ ಕೆಲಸಮಾಡುತ್ತಿದ್ದ ಮಣ್ಣುಗಾರ್ತಿ ಹೇಳುತ್ತಿದ್ದಳು, ಮಣ್ಣು ಕೈಗೆ ತಗುಲುವ ಕ್ಷಣದಲ್ಲಿ ಅದು ತನ್ನದೇ ಉಸಿರನ್ನು ಪಡೆದುಕೊಳ್ಳುತ್ತದೆ ಎಂದು. ಅವಳು ನಂಬಿದ್ದಳು, ನಿಧಾನವಾಗಿ ರೂಪಿಸಲಾದ ಪ್ರತಿಯೊಂದು ಪಾತ್ರೆಯಲ್ಲೂ ಮನುಷ್ಯನ ಭಾವನೆಗಳ ನಿಶ್ಶಬ್ಧ ಅಚ್ಚು ಗುರುತುಗಳಿರುತ್ತವೆ ಎಂದು.", lang: ["カンナダ語"] },
+        { text: "காலை நேரத்தில் கடற்கரையில் நடந்துக்கொண்டிருந்த முதியவர் கூறியது, அலைகளின் சத்தம் அவருக்கு கடந்த காலத்தின் நினைவுகளை மீண்டும் எழுப்புகிறது என்பதுதான். மனிதன் எவ்வளவு தூரம் சென்றாலும், சமூத்ரத்தின் அமைதியில் தான் மனம் உண்மையான ஓய்வை பெறுகிறது என்று அவர் நம்பினார்.", lang: ["タミル語"] },
+        { text: "நகரத்தின் பழைய சந்தையில் உட்கார்ந்திருந்த ஓவியக்காரி சொன்னது, மக்கள் முகங்களில் தோன்றும் சிறிய உணர்வுகள் தான் அவளுடைய படங்களுக்கு உயிராக மாறுகின்றன என்று. ஒரு நிறத்தைத் தேர்ந்தெடுக்குமுன், அந்த இடத்தின் காற்றில் மறைந்திருக்கும் மென்மையான உணர்ச்சிகளை அவள் கவனமாகக் கேட்க முயற்சித்தாள்.", lang: ["タミル語"] },
+        { text: "पहाड़ों के बीच बसे छोटे से गाँव में रहने वाले चरवाहे ने बताया कि सुबह की ठंडी हवा में घंटियों की आवाज़ उसे यह याद दिलाती है कि जीवन की सबसे बड़ी शांति अक्सर सरल दिनों में छिपी होती है। वह मानता है कि पहाड़ इंसान को धैर्य और विनम्रता दोनों सिखाते हैं, यदि कोई ध्यान से सुनना सीखे।", lang: ["ヒンディー語"] },
+        { text: "शहर की भीड़भाड़ वाले चौराहे पर बैठी चायवाली कहती थी कि हर कप चाय के साथ लोग अपने दिन की थकान थोड़ी-थोड़ी उसी के सामने छोड़ जाते हैं। वह महसूस करती है कि अनजान लोगों की छोटी-छोटी बातें भी कभी-कभी इंसान के दिल में उम्मीद की एक नई किरण जगा देती हैं।", lang: ["ヒンディー語"] },
+        { text: "പുഴക്കരയിൽ താമസിക്കുന്ന ഒരു മുതിർന്ന കവിയ‍ൻ പറഞ്ഞു, രാവിലെ പുഴയുടെ മേൽ വീഴുന്ന പൊൻപ്രകാശം തന്റെ മനസ്സിൽ വർഷങ്ങളായി മറഞ്ഞിരുന്ന വാക്കുകളെ വീണ്ടും ഉണർത്തുന്നു എന്ന്. പ്രകൃതിയുടെ നിശ്ശബ്ദതയിൽ മനുഷ്യൻ കണ്ടെത്തുന്ന ആശ്വാസം ഏതൊരു പുസ്തകവും പകരാൻ കഴിയില്ലെന്ന് അവൻ വിശ്വസിച്ചു.", lang: ["マラヤーラム語"] },
+        { text: "നഗരത്തിലെ പഴയ മാർക്കറ്റിൽ പുത്തരി വിൽക്കുന്ന സ്ത്രീ പറഞ്ഞു, സുഗന്ധം നിറഞ്ഞ അരിക്കുരു കൈയിൽ പിടിക്കുമ്പോൾ തന്റെ ബാല്യകാലത്തിലെ വിളവെടുപ്പ് ദിവസങ്ങൾ എല്ലാം ഓർമ്മകളായി ഒഴുകി വരും എന്നു. അവൾക്കെന്ന്, ആളുകളുടെ ദൈനംദിന ചലനങ്ങളിലും നിറഞ്ഞ ഒരു അടങ്ങാത്ത സംഗീതമുണ്ട്, അത് കേൾക്കാൻ സമയം കിട്ടുമ്പോഴാണ് ജീവിതം സ്നേഹത്തോടെ തുറന്ന് കാണിക്കുന്നത്.", lang: ["マラヤーラム語"] },
+        { text: "ସକାଳ ସମୟରେ ନଦୀକୂଳରେ ବସିଥିବା ବୃଦ୍ଧ ନାଉବାଣୀ କହୁଥିଲେ ଯେ, ପାଣିରେ ପଡ଼ୁଥିବା ହାଲୁକା ସୂର୍ଯ୍ୟାଲୋକ ତାଙ୍କୁ ପୁରୁଣା ଯାତ୍ରାମାନଙ୍କ ସ୍ମୃତିରେ ନେଇଯାଏ, ଯେଉଁଠାରେ ପବନ ଓ ତରଙ୍ଗ ତାଙ୍କ ପାଇଁ ନିଜେ ନିଜେ ଗୀତ ଗାଉଥାନ୍ତିଲା; ସେ ବିଶ୍ୱାସ କରୁଥିଲେ ଯେ ନଦୀ ନିରବ ଭାବରେ ମଣିଷର ଭିତରେ ଲୁଚିଥିବା ଭୟକୁ ଶାନ୍ତ କରିଦେଇପାରେ।", lang: ["オリヤー語"] },
+        { text: "ଗ୍ରାମର କାଦମାଟି ରାସ୍ତା ପାଖରେ ଚକୁଳି ବେଚୁଥିବା ଜୁବତୀ କହୁଥିଲେ ଯେ, ତାଙ୍କ ହାତରେ ପକା ଗରମ ଗରମ ଖାଦ୍ୟର ସୁଗନ୍ଧ ଲୋକମାନଙ୍କ ହସକୁ ଅଲ୍ପ ସମୟ ପାଇଁ ମଧ୍ୟ ଆଲୋକିତ କରିଦିଏ; ସେ ମନେ କରୁଥିଲେ ଯେ ଦୈନନ୍ଦିନ ଜୀବନର ଛୋଟ ଆଦତମାନେ ମଣିଷର ହୃଦୟକୁ ବହୁତ ଶାନ୍ତି ଦେଇପାରନ୍ତି, ଯଦି କେଉଁଠି ତାହାକୁ ଧ୍ୟାନ ଦିଆଯାଏ।", lang: ["オリヤー語"] },
+        { text: "ఉదయం పొద్దుపొడిచే వేళ సరస్సు దగ్గర కూర్చున్న వృద్ధ సంగీతకారుడు చెప్పినట్లు, నీటి మీద పడే కాంతి అతనికి కొత్త రాగాల్ని గుర్తు చేస్తుంది. ప్రకృతిలోని నిశ్శబ్దం మనసులో దాగి ఉన్న ఆలోచనలను మెల్లగా తెరిచి చూపుతుందనేది అతని నమ్మకం", lang: ["テルグ語"] },
+        { text: "పట్టణం చివర ఉన్న చిన్న దుకాణంలో పని చేసే యువ గ్రంథపాలకురాలు చెప్పింది, పుస్తకాల ముసురు వాసనలో ఆమెకు ఎన్నో జీవితాల కథలు వినిపిస్తాయని. ఎవరో ఒకరు యాదృచ్ఛికంగా తీసుకున్న పుస్తకం కూడా వారి మనసును మార్చే శక్తి కలిగి ఉంటుందని ఆమె భావించింది.", lang: ["テルグ語"] },
+        { text: "सकाळच्या पहाटे नदीवर हलकी धुके पसरली होती, आणि पाखरांचा आवाज दूरवरुन ऐकू येत होता. मी हळू हळू वाटेवर चालत होतो, आणि झाडांची पाने वाऱ्यात कशी हलत होती ते पाहत होतो.", lang: ["マラーティー語"] },
+        { text: "जेव्हा ट्रेन हलली, तसव्हा अर्जुन खिडकीशी झुकला आणि सभोवतालच्या शेतरांगा, डोंगर पहात होता. त्याला आशा होती की हा प्रवास त्याला नवीन अनुभव आणि प्रेरणा देईल, आणि भविष्यातील संधी उघडेल.", lang: ["マラーティー語"] },
+
+        { text: "နံနက်မိုးလေးကျနေချိန်မှာ မြစ်အပေါ် သဲလွန်တိမ်ကွက်ကွက်နဲ့ သဲလွန်ငှက်တွေ အသံငယ်ငယ်နဲ့ပျံသန်းနေကြပါတယ်။ ငါလမ်းပေါ်နဲ့ ဖြတ်သန်းပြီး အပူညောင်းတဲ့ အလင်းရောင်ကို ကြည့်ရှုနေရပါတယ်။", lang: ["ビルマ語"] },
+        { text: "အဟောင်းအိမ်တောင်ထပ်မှာ မေအာက ရှေးဟောင်းစာတွေ၊ စာအိတ်တွေ ဖြည့်ထားတဲ့ အိတ်တွေတွေ့ခဲ့ပါတယ်။ စာတွေထဲမှာ ခရီးစဉ်၊ လူတွေတွေ့ဆုံမှုနဲ့ အိပ်မက်ပျောက်ဆုံးမှုများကို ဖော်ပြထားပါတယ်။", lang: ["ビルマ語"] },
+        { text: "မြို့လယ်ဈေးမှာ ဆိုင်ရှင်တွေ သစ်သီးအသီးနှင့် အသား၊ နိုင်ငံ့ရိုးရာ အစားအစာတွေ ထားခဲ့ကြပါတယ်။ လူတွေ ရပ်နေပြီး အရသာ စမ်းသပ်၊ စကားပြောနေရပါတယ်။ ပတ်ဝန်းကျင် နွေးထွေးပြီး စိတ်လှုပ်ရှားစရာဖြစ်ပါတယ်။", lang: ["ビルマ語"] },
+        { text: "ရထားသွားလာစဉ်မှာ ဇော်နဲ့ တံခါးဘက်ကို တင်ပြီး အရပ်အပေါ် မြေကြီးနဲ့ တောင်တန်းတွေ အာရုံစိုက် ကြည့်နေခဲ့ပါတယ်။ သူ့အတွက် ဒီခရီးစဉ်ဟာ အသစ်အတွေ့အကြုံနဲ့ အကြံဉာဏ် ပေးမယ်လို့မျှော်လင့်ထားပါတယ်။", lang: ["ビルマ語"] },
+
+        { text: "เช้าวันหนึ่งหมอกบางลอยคลอเหนือแม่น้ำ เสียงนกดังแว่วไกลๆ ฉันเดินไปตามทางเล็กๆ ฟังเสียงใบไม้แกว่งไกวตามลม แสงแดดยามเช้าส่องกระทบพื้นอย่างนุ่มนวล", lang: ["タイ語"] },
+        { text: "บนชั้นใต้หลังคาบ้านเก่า มายาเจอกล่องเก่าที่บรรจุจดหมายและไดอารี่หลายฉบับ ทุกจดหมายบอกเล่าเรื่องการเดินทาง การพบปะผู้คน และความฝันที่ถูกลืมไปนาน เธออ่านอย่างเพลิดเพลิน", lang: ["タイ語"] },
+        { text: "ที่ตลาดกลางเมือง พ่อค้าแม่ค้าเรียงผักผลไม้สด อาหารท้องถิ่น และขนมหลากหลาย ผู้คนหยุดชิม พูดคุย และเลือกซื้อกันอย่างสนุกสนาน บรรยากาศอบอุ่นและมีชีวิตชีวา", lang: ["タイ語"] },
+        { text: "เมื่อรถไฟออกจากสถานี สมชายเอนตัวพิงหน้าต่าง มองทุ่งนาและภูเขาที่ค่อยๆ ผ่านไป เขาหวังว่านี่จะเป็นการเดินทางที่ให้ประสบการณ์ใหม่ และแรงบันดาลใจสำหรับวันข้างหน้า", lang: ["タイ語"] },
+
+        { text: "ຕອນເຊົ້າ ໄມ້ແລະນ້ຳມັນປົກປ້ອງປ່ອຍຄົວ ນົກບິນເຄື່ອນໄຫວເງົາງາມຢ່າງຫນ້ອຍ. ຂ້ອຍຍ່າງຕາມທາງ ແລະຟັງສຽງຫຼຽງຂອງພື້ນດິນທີ່ສວຍງາມ.", lang: ["ラオス語"] },
+        { text: "ຢູ່ເຮືອນເກົ່າ ນານາພົບກ່ອງຈິນຕະກະເກົ່າທີ່ບັນທຶກຈົດໝາຍແລະວັນບັນທຶກ. ໃນເຫຼັ້ນຈົດໝາຍ ມີເລື່ອງການເດີນທາງ ການພົບປະ ແລະຝັນທີ່ຖືກລືມ.", lang: ["ラオス語"] },
+        { text: "ຕະຫຼາດເມືອງ ພໍ່ຄ້າແມ່ຄ້າ ຈັດຜະລິດຜັກຜົນໃໝ່ ແລະອາຫານທ້ອງຖິ່ນ. ປະຊາຊົນຢຸດ ຊິມແລະເວົ້າຄືນ. ບັນຍາຍອຸບອຸ່ນແລະມີຊີວິດ.", lang: ["ラオス語"] },
+        { text: "ເມື່ອລົດໄຟເລີ່ມໄຫຼ ທໍ່ພິລາ ມານີ້ ມອງທິດທາງແລະທົ່ງນາຜາກໄປຢ່າງຊ້າ. ທ່ານຄາດວ່າການດ່ວນນີ້ຈະເຮັດໃຫ້ໄດ້ປະສົບການໃໝ່ ແລະແຮງບັນເດັນໃໝ່.", lang: ["ラオス語"] },
+
+        { text: "ព្រឹកមួយមានព្រលឹមស្រទន់លើទន្លេ និងមានបក្សីហោះហើរដោយស្ងាត់។ ខ្ញុំដើរតាមផ្លូវហើយស្ដាប់សំឡេងស្លឹកឈើរោលទៅតាមខ្យល់។ ព្រះអាទិត្យចេញបង្កើតពន្លឺទន់លើវាល។", lang: ["カンボジア語"] },
+        { text: "នៅលើដំបូលផ្ទះចាស់ អាយចុងបានរកឃើញប្រអប់មួយពេញដោយលិខិតនិងថ្ងៃបណ្ដូរ។ លិខិតមួយៗបាននិយាយអំពីការធ្វើដំណើរ ការជួបជុំ និងក្តីសុបិនដែលបានភ្លេចឆ្ងាយ។", lang: ["カンボジア語"] },
+        { text: "នៅផ្សារកណ្តាល ទីលក់បានដាក់ផ្លែឈើស្រស់ បន្លែ និងម្ហូបប្រពៃណីជាដំណាក់កាល។ មនុស្សឈប់ស្ដាប់ រសជាតិ និងការពិភាក្សា។ បរិយាកាសក្តៅនិងរស់រវើក ពេញនិយមទាក់ទាញទាំងភ្ញៀវនិងអ្នកក្នុងតំបន់។", lang: ["カンボジア語"] },
+        { text: "ពេលរថភ្លើងចេញ ចាន់ហ៊ុយបានអង្គុយជិតបង្អួច ហើយមើលទេសភាពវាលស្រែ និងភ្នំដែលផ្លាស់ប្តូរយ៉ាងយឺត។ គាត់សង្ឃឹមថាការធ្វើដំណើរនេះនឹងផ្តល់បទពិសោធន៍ថ្មី និងការបំផុសគំនិតសម្រាប់ថ្ងៃក្រោយ។", lang: ["カンボジア語"] },
+
+        { text: "Pagi itu kabut tipis menyelimuti sungai, sementara burung-burung berkicau pelan dari kejauhan. Aku berjalan perlahan di sepanjang jalan setapak sambil mendengarkan desiran daun yang tertiup angin. Matahari mulai memancarkan cahaya hangat.", lang: ["インドネシア語"] },
+        { text: "Di loteng rumah tua, Sari menemukan sebuah kotak berisi surat dan catatan lama yang sudah disimpan bertahun-tahun. Setiap surat menceritakan perjalanan, pertemuan, dan mimpi-mimpi yang hampir terlupakan. Ia menghabiskan waktu berjam-jam membacanya.", lang: ["インドネシア語"] },
+        { text: "Di pasar kota, para pedagang menata buah segar, sayuran, dan makanan tradisional. Orang-orang berhenti, mencicipi, dan berbincang. Suasana hangat dan hidup membuat semua orang merasa diterima dan senang berada di sana.", lang: ["インドネシア語"] },
+        { text: "Saat kereta mulai bergerak, Adi bersandar di jendela sambil mengamati sawah dan perbukitan yang perlahan-lahan lewat. Perjalanan ini diharapkannya memberi pengalaman baru serta inspirasi untuk hari-hari mendatang.", lang: ["インドネシア語"] },
+
+        { text: "Pagi itu kabut tipis menyelimuti sungai, sementara burung-burung berkicau pelan dari kejauhan. Aku berjalan perlahan di sepanjang jalan setapak sambil mendengarkan desiran daun yang tertiup angin. Matahari mulai memancarkan cahaya hangat.", lang: ["マレー語"] },
+        { text: "Di loteng rumah tua, Sari menemukan sebuah kotak berisi surat dan catatan lama yang sudah disimpan bertahun-tahun. Setiap surat menceritakan perjalanan, pertemuan, dan mimpi-mimpi yang hampir terlupakan. Ia menghabiskan waktu berjam-jam membacanya.", lang: ["マレー語"] },
+        { text: "Di pasar bandar, para peniaga menyusun buah-buahan segar, sayur-sayuran dan makanan tradisional. Orang ramai berhenti, mencuba dan berbual antara satu sama lain. Suasananya hangat dan meriah, menarik perhatian semua pengunjung.", lang: ["マレー語"] },
+        { text: "Apabila kereta mula bergerak, Amir bersandar pada tingkap dan memerhati sawah serta bukit yang perlahan-lahan berlalu. Perjalanan itu diharapkan memberi pengalaman baru serta idea segar untuk masa depan.", lang: ["マレー語"] },
+
+        { text: "清晨，河面上笼罩着薄雾，远处传来鸟儿轻柔的鸣叫。我沿着小路缓缓前行，倾听风吹动树叶的声音。阳光柔和地洒在田野上，给人一种宁静的感觉。", lang: ["中国語"] },
+        { text: "在老屋的阁楼上，小梅发现了一个装满信件和日记的箱子。每封信都讲述着旅行、相遇和被遗忘已久的梦想。她花了几个小时沉浸在这些文字里，感受着过去的回忆。", lang: ["中国語"] },
+        { text: "在城市的集市上，商贩们摆放着新鲜的水果、蔬菜和当地小吃。人们停下脚步品尝、交流。热闹而温暖的气氛让每个人都感到舒适与欢迎。", lang: ["中国語"] },
+        { text: "火车启动时，小明靠在窗边，看着田野和山丘慢慢后退。他希望这次旅行能带来新的体验，也能激发未来的灵感和思考。", lang: ["中国語"] },
+
+        { text: "朝早時，河上薄霧籠罩，遠方鳥兒輕聲鳴叫。我沿小徑緩行，聽風吹葉搖曳聲。陽光柔和灑在田野上，感到寧靜舒適。", lang: ["台湾語"] },
+        { text: "舊屋頂樓，阿玲發現一個箱子，內有多年保存的書信與日記。每封信述說旅途、相遇與被遺忘的夢。她花數小時細讀，沉浸其中回味過往。", lang: ["台湾語"] },
+        { text: "市集裡，攤販陳列新鮮水果、蔬菜及地方小吃。人們停步品嚐、交談。熱鬧溫馨的氣氛吸引來來往往的居民與遊客。", lang: ["台湾語"] },
+        { text: "火車啟動時，小安靠窗觀察田野與群山慢慢退去。他期望此次旅程帶來新體驗，也啟發未來的靈感與想法。", lang: ["台湾語"] },
+
+        { text: "Το πρωί, μια λεπτή ομίχλη κάλυπτε τον ποταμό και τα πουλιά κελαηδούσαν μακριά. Περπατούσα αργά στο μονοπάτι, ακούγοντας τον άνεμο να κινεί τα φύλλα. Το φως του ήλιου έριχνε απαλή ζεστασιά στα χωράφια.", lang: ["ギリシャ語"] },
+        { text: "Στη σοφίτα του παλιού σπιτιού, η Μαρία ανακάλυψε ένα κουτί με παλιά γράμματα και ημερολόγια. Κάθε γράμμα αφηγούταν ταξίδια, συναντήσεις και ξεχασμένα όνειρα. Πέρασε ώρες διαβάζοντάς τα προσεκτικά.", lang: ["ギリシャ語"] },
+        { text: "Στην κεντρική αγορά της πόλης, οι πωλητές είχαν τοποθετήσει φρέσκα φρούτα, λαχανικά και παραδοσιακά εδέσματα. Οι άνθρωποι σταματούσαν, δοκίμαζαν και συνομιλούσαν. Η ατμόσφαιρα ήταν ζεστή και ζωντανή.", lang: ["ギリシャ語"] },
+        { text: "Όταν ξεκίνησε το τρένο, ο Γιώργος έγειρε στο παράθυρο και παρατηρούσε τα χωράφια και τους λόφους να περνούν αργά. Ελπίζει ότι αυτό το ταξίδι θα του φέρει νέες εμπειρίες και έμπνευση για το μέλλον.", lang: ["ギリシャ語"] },
+
+        { text: "Sabah erken saatlerde nehir üzerinde ince bir sis vardı ve uzaktan kuşların sessiz cıvıltıları geliyordu. Yavaşça patikada yürüdüm, rüzgarla sallanan yaprakların sesini dinledim. Güneş ışığı tarlaları yumuşak bir şekilde aydınlatıyordu.", lang: ["トルコ語"] },
+        { text: "Eski evin çatı katında Elif, yıllardır saklanmış mektuplar ve günlüklerle dolu bir kutu buldu. Her mektup yolculuklar, karşılaşmalar ve unutulmuş hayaller hakkında hikaye anlatıyordu. Saatlerce onları okuyarak vakit geçirdi.", lang: ["トルコ語"] },
+        { text: "Şehir pazarında satıcılar taze meyve, sebze ve geleneksel yiyecekler sergiledi. İnsanlar durup tadına bakıyor, sohbet ediyordu. Sıcak ve canlı atmosfer, herkesi kendine çekiyordu.", lang: ["トルコ語"] },
+        { text: "Tren hareket ettiğinde, Ahmet pencereye yaslanıp etrafındaki tarlaları ve yavaşça geçen tepeleri izledi. Bu yolculuğun ona yeni deneyimler kazandırmasını ve gelecekte ilham vermesini umuyordu.", lang: ["トルコ語"] },
+
+        { text: "בבוקר מוקדם ערפל דק כיסה את הנהר, וציפורים צייצו מרחוק בקול רך. אני הלכתי לאט בשביל הקטן והקשבתי לרשרוש העלים ברוח. אור השמש נשפך ברוך על השדות.", lang: ["ヘブライ語"] },
+        { text: "על עליית הגג של בית ישן, מרים מצאה קופסה מלאה במכתבים ויומנים שנשמרו במשך שנים רבות. כל מכתב סיפר על מסעות, מפגשים וחלומות שנשכחו. היא בילתה שעות בקריאתם.", lang: ["ヘブライ語"] },
+        { text: "בשוק המרכזי של העיר סידרו המוכרים פירות טריים, ירקות ומאכלים מסורתיים. אנשים עצרו, טעמו ודיברו ביניהם. האווירה הייתה חמה וחיה, מושכת את כל המבקרים.", lang: ["ヘブライ語"] },
+        { text: "כאשר הרכבת יצאה, דני נשען על החלון וצפה בשדות ובגבעות החולפות לאט. הוא קיווה שהנסיעה הזו תביא לו חוויות חדשות ותשריש השראה לימי העתיד.", lang: ["ヘブライ語"] },
+
+        
+
+        
+/*
+        { text: "", lang: [""] },
+        { text: "", lang: [""] },
+        { text: "", lang: [""] },
+        { text: "", lang: [""] }, */
+      
+
+      
+
+      
+
+    ];
+
+    let currentAnswer = ""; // 現在の正解言語を記録
+
+    // ランダム出力
+    function generate() {
+        const item = data[Math.floor(Math.random() * data.length)];
+        document.getElementById("question").textContent = item.text;
+        currentAnswer = item.lang;
+
+        // 前の結果をクリア
+        document.getElementById("result").textContent = "";
+        document.getElementById("answer").textContent = "";
+        document.getElementById("userInput").value = "";
+    }
+
+    // 答え合わせ
+function checkAnswer() {
+    const user = document.getElementById("userInput").value.trim();
+
+    if (user === "") {
+        document.getElementById("result").textContent = "言語名を入力して";
+        return;
+    }
+
+    // currentAnswer は配列なので includes で判定
+    if (currentAnswer.includes(user)) {
+        document.getElementById("result").textContent = "正解";
+        document.getElementById("result").style.color = "green";
+    } else {
+        document.getElementById("result").textContent = "不正解";
+        document.getElementById("result").style.color = "red";
+    }
+}
+
+// 答え表示も配列なので join() で文字列化
+function showAnswer() {
+    if (!currentAnswer) {
+        document.getElementById("answer").textContent = "まずランダム出力を押し";
+        return;
+    }
+    document.getElementById("answer").textContent = "答え： " + currentAnswer.join(" / ");
+}
+
+</script>
+
+</body>
+</html>

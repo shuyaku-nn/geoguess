@@ -1,0 +1,64 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin:10vh;
+}
+
+.container {
+    background: white;
+    padding: 1vh; /* 3倍 */
+    border-radius: 20px; /* 大きく */
+    width: 90%;
+    max-width: 900px; /* 3倍 */
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+h2 {
+    font-size: 48px; /* 3倍 */
+    margin: 0.1vh;   /*言語判定クイズの下の余白*/
+}
+
+button {
+    margin:1vw;
+    padding: 1vh 1vw; 
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 32px; /* 3倍 */
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+input {
+    margin: 2vh;
+    padding: 1vh; /* 3倍 */
+    width: 80%;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    font-size: 25px; /* 3倍 */
+}
+
+#question {
+    font-size: 25px; /* 3倍 */
+    margin:3vh;
+    font-weight: bold;
+    padding:1vh 1vw;
+}
+
+#result, #answer {
+    margin-top: 30px;
+    font-size: 36px; /* 3倍 */
+    font-weight: bold;
+}
+
+#answer {
+    color: #ff5722;
+}

@@ -62,3 +62,12 @@ input {
 #answer {
     color: #ff5722;
 }
+
+@media (min-width: 768px) {
+    h2 { font-size: 48px; }
+    button { font-size: 32px; padding: 1vh 1vw; }
+    input { font-size: 25px; padding: 1vh; width: 80%; }
+    #question { font-size: 20px; }
+    #result, #answer { font-size: 25px; }
+    .container { max-width: 1200px; padding: 1vh; }
+}

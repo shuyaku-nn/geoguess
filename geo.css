@@ -64,10 +64,10 @@ input {
 }
 
 @media (min-width: 768px) {
-    h2 { font-size: 48px; }
-    button { font-size: 32px; padding: 1vh 1vw; }
+    h2 { font-size: 40px; }
+    button { font-size: 30px; padding: 1vh 1vw; }
     input { font-size: 25px; padding: 1vh; width: 80%; }
     #question { font-size: 20px; }
-    #result, #answer { font-size: 25px; }
-    .container { max-width: 1200px; padding: 1vh; }
+    #result, #answer { font-size: 30px; }
+    .container { width: 1200px; padding: 1vh; }
 }
